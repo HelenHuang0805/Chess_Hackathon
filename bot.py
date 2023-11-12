@@ -29,7 +29,6 @@ import numpy
 import numpy as np
 
 import test_bot
-from possibility import Possibility
 
 
 @contextmanager
@@ -184,9 +183,6 @@ if __name__ == "__main__":
     lose_count = 0
     total_game = 100
     count_game = 0
-
-    poss = Possibility()
-    model = poss.train("puzzles.txt")
 
     mlp_piece = joblib.load('mlp_piece_model.joblib')
     mlp_destination = joblib.load('mlp_destination_model.joblib')

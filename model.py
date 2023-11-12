@@ -13,16 +13,22 @@ with open('puzzles.txt', 'r') as file:
 # Parse the FEN (Forsyth-Edwards Notation) and the move
 puzzles_data = []
 for line in puzzles_lines:
-    parts = line.strip().split(' ')
-    if 'w' in parts or 'b' in parts:  # Checking for FEN records
-        fen = ' '.join(parts[:6])  # Include all FEN parts except comments
-        board_part = parts[0]  # FEN part representing the board
-    elif line.startswith('1. '):  # Checking for solution records
+    i = 7  # Starting from the 8th line (index is 7 because indexing starts from 0)
+    while i < len(puzzles_lines) - 2:
+        # Assuming each chess record spans three lines: a title line, a FEN line, and a move line
+        title_line = puzzles_lines[i].strip()
+        fen_line = puzzles_lines[i + 1].strip()
+        move_line = puzzles_lines[i + 2].strip()
 
-        move = parts[1].replace('+', '').replace('#', '')  # Take only the first move, remove '+' and '#'
-        if move.endswith('...'):
-            continue  # Skip if the move is incomplete
-        puzzles_data.append((fen, move))
+        if move_line.startswith('1. '):  # Check if it's a line with chess moves
+            moves = move_line.split(' ')[1]  # get the first move
+            if 'x' in moves:
+                moves = moves[0:1] + moves[2:]
+            if '+' in moves:
+                moves = moves[0:-1]
+            puzzles_data.append((fen_line, moves))
+
+        i += 3  # Jump to the start of the next chess record
 
 # Create a DataFrame from the parsed data
 df = pd.DataFrame(puzzles_data, columns=['FEN', 'Move'])
@@ -38,9 +44,11 @@ def fen_to_matrix(fen):
         if char.isdigit():
             matrix.extend([0] * int(char))  # Add empty spaces
         elif char.isalpha():
+            if char not in piece_to_value:
+                raise ValueError(f"Unexpected character '{char}' in FEN string '{fen}'")
             matrix.append(piece_to_value[char])  # Add pieces
     if len(matrix) != 64:
-        raise ValueError(f"FEN string '{fen}' cannot be converted to a 8x8 matrix.")
+        raise ValueError(f"FEN string '{fen}' cannot be converted to an 8x8 matrix.")
     return matrix
 
 
@@ -65,7 +73,6 @@ def encode_move(move):
     # Split the move string into piece and destination
     piece, destination = move[0], move[-2:]
     return piece, destination
-
 
 # Apply the encoding function
 df[['Piece', 'Destination']] = df['Move'].apply(encode_move).tolist()
