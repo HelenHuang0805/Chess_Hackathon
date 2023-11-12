@@ -23,13 +23,8 @@ import chess
 import time
 from collections.abc import Iterator
 from contextlib import contextmanager
-
 import joblib
-import numpy
 import numpy as np
-
-import test_bot
-
 
 @contextmanager
 def game_manager() -> Iterator[None]:
@@ -209,8 +204,6 @@ if __name__ == "__main__":
 
                     # get move form network
                     max_moves, max_strength = get_next_move_from_network(mlp_piece, mlp_destination)
-                    # get move from possibility
-                    next_move_from_poss = get_next_move_from_poss(model)
 
                     if len(max_moves) == 1:
                         chess_bot.board.push_san(max_moves.pop()[1])
